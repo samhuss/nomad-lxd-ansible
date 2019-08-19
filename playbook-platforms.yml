@@ -1,0 +1,39 @@
+---
+- hosts: localhost
+# variables can be found under group_vars/all/main.yml  
+  tasks:
+    - name: download required platforms
+      get_url:
+        url: "{{item.url}}"
+        dest: "{{item.dest}}"
+      with_items:
+        - url: file:///home/sam/Downloads/{{jetty_file}}
+          dest: cache/{{jetty_file}}
+        - url: "{{kafka_url}}"
+          dest: "cache/{{kafka_file}}"
+        
+
+#    - name: fetch platforms
+#      unarchive:
+#        src: "{{ item.url }}"
+#        #src: "/home/sam/Downloads/jetty-distribution-9.4.19.v20190610.zip"
+#        dest: cache/{{item.file}}
+#        state: directory
+#        creates: cache/{{item.file}}
+#        extra_opts: [--strip-components=1]
+#        remote_src: yes
+#      loop:
+#        #- url: "{{ jetty_url }}"
+#        - url: "/home/sam/Downloads/jetty-distribution-9.4.19.v20190610.zip"
+#          file: jetty
+
+
+
+- name: install platforms
+  hosts: nomad_clients
+  roles:
+    - nomad_platforms
+ 
+
+
+

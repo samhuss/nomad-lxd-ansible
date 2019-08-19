@@ -1,0 +1,40 @@
+---
+- name: create jetty home directory
+  file:
+    path: "{{item.path}}"
+    state: directory
+    mode: 0755
+  with_items:
+    - path: /opt/jetty
+    - path: /opt/kafka
+
+- name: copy jetty server 
+  copy:
+    src: "{{item.src}}"
+    dest: /tmp/
+    mode: 0777
+  with_items:
+    - src: cache/{{jetty_zip}}
+    - src: cache/{{kafka_file}}
+
+
+- name: unarchive remote jetty
+  unarchive:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    remote_src: yes
+  with_items:
+    #- src: cache/{{jetty_zip}}
+    - src: /tmp/{{jetty_zip}}
+      dest: "/opt/jetty"
+    #- src: cache/{{kafka_file}} 
+    - src: /tmp/{{kafka_file}}
+      dest: "/opt/kafka"
+      
+- name: clean tmp directories
+  file: 
+    path: "/tmp/{{item.name}}" 
+    state: absent
+  with_items:
+    - name: "{{jetty_zip}}"
+    - name: "{{kafka_file}}"

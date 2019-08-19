@@ -1,0 +1,8 @@
+---
+jetty_file: jetty-distribution-9.4.19.v20190610.zip
+jetty_url: "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.19.v20190610/{{jetty_file}}"
+jetty_zip: "jetty.tar.gz"
+jetty_dest: "/opt/jetty"
+kafka_file: kafka_2.12-2.3.0.tgz
+kafka_url: "https://www-eu.apache.org/dist/kafka/2.3.0/{{kafka_file}}"
+  

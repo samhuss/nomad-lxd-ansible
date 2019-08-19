@@ -1,0 +1,6 @@
+---
+- name: install jetty
+  copy:
+    src: cache/jetty
+    dest: /opt/jetty
+    mode: 0777
