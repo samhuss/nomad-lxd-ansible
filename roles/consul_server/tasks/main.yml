@@ -1,5 +1,8 @@
 ---
 - import_role:
+    name: runtime_env
+
+- import_role:
     name: consul_service
 
 - name: copy consul config

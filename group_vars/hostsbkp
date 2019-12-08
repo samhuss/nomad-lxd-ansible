@@ -1,0 +1,56 @@
+proxy           
+
+[consul_servers]
+consul1         
+consul2         
+consul3         
+
+[nomad_servers]
+nomad-server1   
+nomad-server2   
+nomad-server3   
+
+[nomad_clients]
+nomad-client1   
+nomad-client2   
+nomad-client3   
+
+[zookeepers]
+nomad-client1       zookeeper_myid=1
+nomad-client2       zookeeper_myid=2
+nomad-client3       zookeeper_myid=3
+
+[kafka_brokers]
+nomad-client1       broker_id=1
+nomad-client2       broker_id=2
+nomad-client3       broker_id=3
+
+
+[lxc_containers:children]
+consul_servers
+nomad_servers
+nomad_clients
+
+
+
+[master]
+localhost   ansible_connection=local
+
+
+[bootstrap]
+localhost   ansible_connection=local
+
+
+[kafka_brokers:vars]
+zookeepers=client.zk-server.service.consul:2181
+
+[master:vars]
+network_interface=lxdbr0
+datacenter=dev
+
+
+[all:vars]
+network_interface=eth0
+ansible_connection=lxd
+ansible_python_interpreter=/usr/bin/python3
+datacenter="dc1"

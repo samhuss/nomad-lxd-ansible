@@ -1,0 +1,17 @@
+---
+# - name: install kafka
+
+- name: create config directories
+  file:
+    path: "{{item}}"
+    state: directory 
+  loop:
+    - "{{kafka_config}}"
+    - "{{kafka_logs}}"
+
+
+- name: install kafka config
+  template:
+    src: templates/server.properties.j2
+    dest: "{{kafka_config}}/server.properties"
+  

@@ -1,16 +1,20 @@
 ---
-- hosts: localhost
+- hosts: bootstrap
+  become: yes
 # variables can be found under group_vars/all/main.yml  
   tasks:
-    - name: download required platforms
+    - name: download kafka, zookeeper
       get_url:
         url: "{{item.url}}"
         dest: "{{item.dest}}"
       with_items:
-        - url: file:///home/sam/Downloads/{{jetty_file}}
-          dest: cache/{{jetty_file}}
-        - url: "{{kafka_url}}"
-          dest: "cache/{{kafka_file}}"
+        #- url: "file:///home/sam/Downloads/{{jetty_file}}"
+        # - url: "{{jetty_download_url}}"
+        #   dest: "{{cache_dir}}/{{jetty_file}}"
+        - url: "{{kafka_download_url}}"
+          dest: "{{cache_dir}}/{{kafka_file}}"
+        - url: "{{zookeeper_download_url}}"
+          dest: "{{cache_dir}}/{{zookeeper_file}}"
         
 
 #    - name: fetch platforms
@@ -28,12 +32,32 @@
 #          file: jetty
 
 
+# - name: install_zookeeprs
+#   hosts: nomad_clients
+#   roles:
+#     - zookeeper
 
-- name: install platforms
-  hosts: nomad_clients
+- name: install_kafka
+  hosts: kafka_brokers
   roles:
-    - nomad_platforms
- 
+    - kafka
 
+- name: install_redis
+  hosts: master
+  become: yes
+  tags:
+    - redis
+  roles:
+    - redis
+
+
+- name: install_prometheus
+  hosts: master
+  become: yes
+  tags:
+    - monitoring
+    - prometheus
+  roles:
+    - monitoring
 
 

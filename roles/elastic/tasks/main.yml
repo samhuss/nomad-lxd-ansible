@@ -1,0 +1,13 @@
+---
+- name: install logstash
+  unarchive: {src: "{{bootstrap_url}}/{{logstash_zip}}", dest: "{{logstash_dest}}", mode: "777", remote_src: yes}
+
+- name: install filebeat
+  unarchive: {src: "{{bootstrap_url}}/{{filebeat_zip}}", dest: "{{filebeat_dest}}", mode: "777", remote_src: yes}
+
+
+
+
+
+
+

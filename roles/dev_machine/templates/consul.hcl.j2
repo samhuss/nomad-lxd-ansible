@@ -1,0 +1,14 @@
+data_dir = "/var/consul"
+server = false
+node_name = "{{ansible_hostname}}"
+#datacenter = "dev"
+
+advertise_addr = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address']}}" 
+#client_addr = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}"
+#client_addr = "127.0.0.1"
+client_addr = "0.0.0.0"
+enable_script_checks = true
+retry_join = [ "{{ hostvars['consul1'].ansible_eth0.ipv4.address}}" ]
+#retry_join = [ "consul1" ]
+
+

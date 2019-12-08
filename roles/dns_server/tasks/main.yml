@@ -1,0 +1,44 @@
+- name: install dnsmasq
+  package: name=dnsmasq state=latest
+
+# - name: unlock resolv.conf
+#   shell: "chattr -i /etc/resolv.conf"
+#   when: inventory_hostname == "master"
+
+# - name: delete resolv.conf 
+#   file:
+#     path: /etc/resolv.conf
+#     state: absent
+  
+- name: stop dns services
+  service:
+    name: "{{item}}"
+    state: stopped
+    enabled: no
+    # fail_on_error: no
+  loop:
+    # - unbound
+    - systemd-resolved
+
+
+- name: copy dnsmasq , resolv config files
+  become: yes
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    mode: 0644
+  loop:
+    - {src : templates/dnsmasq.conf.j2, dest: /etc/dnsmasq.conf}
+    - {src : templates/resolv.conf, dest: /etc/resolv.conf}
+  notify: restart dnsmasq
+  
+
+# - name: set immutable resolv.conf
+#   shell: "chattr +i /etc/resolv.conf"
+#   when: inventory_hostname == "master"
+
+# - name: disable systemd-resolved service
+#   service:
+#     name: systemd-resolved
+#     state: stopped
+#     enabled: no

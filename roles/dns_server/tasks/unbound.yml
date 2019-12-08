@@ -1,0 +1,42 @@
+- name: install unbound
+  package: name=unbound state=latest
+  when: ansible_distribution == "Ubuntu"
+
+
+- name: disable systemd-resolved service
+  service:
+    name: "{{item}}"
+    state: stopped
+    enabled: no
+  loop:
+    - dnsmasq
+    - systemd-resolved
+
+- name: create unbound log file
+  become: yes
+  file: path="/var/log/unbound.log" state="touch" mode="777"
+
+- name: unbound config
+  template: 
+    src : "{{item.src}}"
+    dest : "{{item.dest}}" 
+    mode : 644
+  loop:
+    - {src : templates/resolv.conf, dest: /etc/resolv.conf}
+    - {src: templates/unbound.conf.j2, dest: /etc/unbound/unbound.conf}
+    - {src: files/consul.conf, dest: /etc/unbound/unbound.conf.d/consul.conf}
+  notify: restart unbound
+
+- name: clean unbound conf directory
+  file: 
+    path: "/etc/unbound/unbound.conf.d/{{item}}" 
+    state: absent
+  loop:
+    - qname-minimisation.conf
+    - root-auto-trust-anchor-file.conf
+  notify: restart unbound
+
+- name: enable unbound
+  service:
+    name: unbound
+    enabled: yes

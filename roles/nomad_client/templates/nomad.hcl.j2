@@ -1,9 +1,61 @@
 data_dir  = "/var/nomad"
+datacenter = "dc1"
 
-bind_addr = "{{ ansible_eth0.ipv4.address }}"
+#bind_addr = "{{ hostvars[inventory_hostname][ 'ansible_' + network_interface ].ipv4.address }}"
+bind_addr = "0.0.0.0"
+name= "{{ansible_hostname}}"
 
 client {
   enabled = true
-  network_interface = "eth0"
+  #network_interface = "{{network_interface}}"
+
+# ca-certificates folder shared by lxc
+  host_volume "ca-certificates" {
+    path = "/opt/share/certs"
+    read_only = true
+  }
+
+  # persistent data folder
+  host_volume "data" {
+    path = "/data"
+    read_only = false
+  }
+
+  # shared programs across all clients
+  host_volume "share" {
+    path = "/opt/share"
+    read_only = true
+  }
+
+  meta {
+      my_id = {{ ansible_play_hosts.index(inventory_hostname) + 1}} 
+      type = "{{type}}"
+      datacenter =  "{{datacenter}}"
+      ip = "{{ansible_default_ipv4.address}}"
+      {%if ansible_play_hosts.index(inventory_hostname) == 0 %}
+      master = true
+      {%else%}
+      master = false
+      {%endif%}
+      {#
+      #}
+    connect.sidecar_image = "envoyproxy/envoy-alpine"
+
+
+      {#  get host index within a group
+      {{ groups.somegroup.index(inventory_hostname) }}
+      #}
+    }
 }
 
+plugin "raw_exec" {
+  config {
+    enabled = true
+  }
+}
+
+consul {
+  address = "127.0.0.1:8500"
+  auto_advertise = true
+  client_auto_join = true
+}

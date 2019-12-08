@@ -1,0 +1,2 @@
+kafka_logs: /data/kafka/logs
+kafka_config: /data/kafka/config

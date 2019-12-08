@@ -1,0 +1,41 @@
+data_dir  = "/var/nomad"
+datacenter = "{{datacenter}}"
+#bind_addr = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}"
+bind_addr = "0.0.0.0"
+name= "{{ansible_hostname}}"
+#advertise_addr = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}"
+
+advertise {
+  # Defaults to the first private IP address.
+ # http = "0.0.0.0"
+  http = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}"
+  rpc  = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}"
+  serf = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}"
+
+ # ability to add different port number than the default one
+ # serf = "1.2.3.4:5648" # non-default ports may be specified
+}
+
+meta {
+  "env"="dev"
+  "data" = "persistent"
+  "class"="static"
+}
+
+client {
+  enabled = true
+  network_interface = "{{network_interface}}"
+}
+
+plugin "raw_exec" {
+  config {
+    enabled = true
+  }
+}
+
+consul {
+  #address = "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}:8500"
+  address = "127.0.0.1:8500"
+  auto_advertise = true
+  client_auto_join = true
+}

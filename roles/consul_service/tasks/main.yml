@@ -1,14 +1,15 @@
 ---
 - name: install consul
-  copy:
-    src: cache/consul
-    dest: /usr/local/bin/
+  get_url:
+    url: "{{bootstrap_url}}/consul"
+    dest: /usr/local/bin/consul
     mode: 0755
+    checksum: "sha1:de816f426de692d4441fc4bd9fe65860fe25fc47"
 
 - name: create consul service
   copy:
     src: consul.service
-    dest: /etc/systemd/system/
+    dest: /etc/systemd/system/consul.service
 
 - name: create consul directories
   file:

@@ -1,0 +1,14 @@
+[Unit]
+Description="Fabio proxy"
+Documentation=https://fabio.io
+#Requires=network-online.target
+#After=network-online.target
+ConditionFileNotEmpty=/opt/fabio/fabio.properties
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/local/bin/fabio --cfg=/opt/fabio/fabio.properties -insecure
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

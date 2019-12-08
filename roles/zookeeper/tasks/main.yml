@@ -1,0 +1,58 @@
+---
+# - name: create zookeeper data directories
+#   file:
+#     path: "{{item.path}}"
+#     state: directory
+#     mode: 0755
+#   with_items:
+#     - path: "{{zookeeper_root_dir}}" 
+#     - path: "{{zookeeper_data_dir}}" 
+#     - path: "{{zookeeper_conf_dir}}" 
+#     - path: "{{zookeeper_datalog_dir}}" 
+
+# - name: deploy zookeeper
+#   unarchive:
+#     src: "{{bootstrap_url}}/{{zookeeper_file}}"
+#     dest: /opt
+#     remote_src: yes
+
+# - name: create zookeeper link
+#   file:
+#     src: "{{zookeeper_home_dir}}"
+#     path: /opt/zookeeper
+#     state: link
+
+
+- name: configure zookeeper
+#   become: yes
+#   become_user: root
+  with_items:
+    - f: zoo.cfg
+      d: '{{ zookeeper_conf_dir }}'
+    - f: log4j.properties
+      d: '{{ zookeeper_conf_dir }}'
+    - f: myid
+      d: '{{ zookeeper_data_dir }}'
+  template:
+    src: '{{ item.f }}.j2'
+    dest: '{{ item.d }}/{{ item.f }}'
+    mode: '{{ item.m|default("0644") }}'
+    force: yes
+
+# - name: scan iptables on zookeeper hosts
+#   shell: iptables -L
+#   register: iptablesrules
+#   always_run: yes
+
+
+# - name: add zookeeper iptables rule
+#   shell: iptables -I INPUT -s 0/0 -p tcp --dport 2181 -j ACCEPT -m comment --comment "zookeeper"
+#   when: iptablesrules.stdout.find("zookeeper") == -1
+
+# - name: save iptables
+#   command: iptables-save
+
+# - name: restart iptables
+#   service:
+#       name: ufw
+#       state: restarted 

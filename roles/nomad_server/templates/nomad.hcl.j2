@@ -11,3 +11,9 @@ server {
   bootstrap_expect = 3
   raft_protocol    = 3
 }
+
+consul {
+  address = "127.0.0.1:8500"
+  auto_advertise = true
+  client_auto_join = true
+}

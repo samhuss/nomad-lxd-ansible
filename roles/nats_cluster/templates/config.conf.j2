@@ -1,0 +1,18 @@
+
+// NATS specific configuration
+port: 4222
+cluster {
+  listen: 0.0.0.0:6222
+  routes: ["nats://host2:6222", "nats://host3:6222"]
+}
+
+// NATS Streaming specific configuration
+streaming {
+  id: mycluster
+  store: file
+  dir: store
+  cluster {
+    node_id: "a"
+    peers: ["b", "c"]
+  }
+}

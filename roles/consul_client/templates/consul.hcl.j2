@@ -1,7 +1,13 @@
 data_dir = "/var/consul"
 server = false
 
-advertise_addr = "{{ ansible_eth0.ipv4.address }}"
-client_addr = "127.0.0.1 {{ ansible_eth0.ipv4.address }}"
+bind_addr = "{{ hostvars[inventory_hostname][ 'ansible_' + network_interface ].ipv4.address }}"
+
+#advertise_addr = "{{ 'ansible_' + network_interface + '.ipv4.address' }}" 
+
+client_addr = "127.0.0.1  {{ hostvars[inventory_hostname][ 'ansible_' + network_interface ].ipv4.address }}"
 enable_script_checks = true
-retry_join = [ "{{ hostvars.consul1.ansible_hostname }}" ]
+retry_join = [ "{{ hostvars["consul1"][ 'ansible_' + network_interface ].ipv4.address }}" ]
+#retry_join = [ "consul1", "consul2", "consul3" ]
+
+#recursors = ["{{ hostvars[inventory_hostname][ 'ansible_' + network_interface ].ipv4.address }}", "8.8.8.8", "8.8.4.4"]

@@ -1,0 +1,40 @@
+---
+# install dns and nats cluster in all containers
+- hosts: lxc_containers
+  roles:
+    - {role: dns_server, tags: ['lxc_containers']}
+    - {role: nats_cluster, tags: ['nats']}
+
+- hosts: lxc_containers
+  tasks:
+    - name: install consul template in all machines
+      get_url: url="{{bootstrap_url}}/consul-template" dest="/usr/local/bin/consul-template" mode=755
+  tags:
+    - server
+    - proxy
+
+- hosts: consul_servers
+  roles:
+    - {role: consul_server, tags: ['consul', 'consul_server']}
+
+- hosts: nomad_servers
+  roles:
+    - {role: consul_client, tags: ['consul', 'nomad_server']}
+    - {role: nomad_server, tags: ['server', 'nomad_server']}
+  tags:
+    - server
+    - nomad
+
+- hosts: nomad_clients
+  roles:
+    - {role: consul_client, tags: ['consul', 'nomad_client']}
+    - {role: nomad_client, tags: ['client', 'nomad_client']}
+    - {role: vault_server, tags: ['vault', 'vault_server']}
+
+- hosts: proxy
+  roles:
+    - {role: consul_client, tags: ['consul', 'proxy_server']}
+    - {role: proxy, tags: ['server', 'proxy']}
+
+
+

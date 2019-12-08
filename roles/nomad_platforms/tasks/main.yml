@@ -1,40 +1,77 @@
 ---
-- name: create jetty home directory
+- name: create root directories for kafka,zookeeper,jetty
   file:
     path: "{{item.path}}"
     state: directory
     mode: 0755
   with_items:
-    - path: /opt/jetty
-    - path: /opt/kafka
-
-- name: copy jetty server 
-  copy:
-    src: "{{item.src}}"
-    dest: /tmp/
-    mode: 0777
-  with_items:
-    - src: cache/{{jetty_zip}}
-    - src: cache/{{kafka_file}}
+    - path: "{{jetty_root_dir}}"
+    - path: "{{kafka_root_dir}}"
 
 
-- name: unarchive remote jetty
+# - name: remove old directories
+#   file:
+#     path: "{{item.path}}"
+#     state: absent
+#   with_items:
+#     - path: "/opt/{{kafka_file}}"
+    #  - path: "/opt/{{zookeeper_version}}"
+#     - path: "/opt/{{jetty_file}}"
+#     - path: /opt/jetty
+#     - path: /opt/kafka
+    #  - path: /opt/zookeeper
+
+# - name: copy jetty server 
+#   copy:
+#     src: "{{item.src}}"
+#     dest: /tmp/
+#     mode: 0777
+#   with_items:
+#     - src: cache/{{jetty_zip}}
+#     - src: cache/{{kafka_file}}
+
+
+# - name: unarchive remote jetty
+#   unarchive:
+#     src: "{{item.src}}"
+#     dest: "{{item.dest}}"
+#     remote_src: yes
+#   with_items:
+#     #- src: cache/{{jetty_zip}}
+#     - src: /tmp/{{jetty_zip}}
+#       dest: "/opt/jetty"
+#     #- src: cache/{{kafka_file}} 
+#     - src: /tmp/{{kafka_file}}
+#       dest: "/opt/kafka"
+      
+
+
+- name: deploy jetty-zookeeper-kafka
   unarchive:
     src: "{{item.src}}"
-    dest: "{{item.dest}}"
+    dest: /opt
     remote_src: yes
   with_items:
-    #- src: cache/{{jetty_zip}}
-    - src: /tmp/{{jetty_zip}}
-      dest: "/opt/jetty"
-    #- src: cache/{{kafka_file}} 
-    - src: /tmp/{{kafka_file}}
-      dest: "/opt/kafka"
-      
-- name: clean tmp directories
-  file: 
-    path: "/tmp/{{item.name}}" 
-    state: absent
+    - src: "{{bootstrap_url}}/{{jetty_file}}"
+    - src: "{{bootstrap_url}}/{{kafka_file}}"
+
+# - name: clean tmp directories
+#   file: 
+#     path: "/tmp/{{item.name}}" 
+#     state: absent
+#   with_items:
+#     - name: "{{jetty_zip}}"
+#     - name: "{{kafka_file}}"
+
+- name: create links
+  file:
+    src: "{{item.src}}"
+    path: "{{item.path}}"
+    state: link
   with_items:
-    - name: "{{jetty_zip}}"
-    - name: "{{kafka_file}}"
+    - src: "{{kafka_home_dir}}"
+      path: /opt/kafka
+    - src: "{{jetty_home_dir}}"
+      path: /opt/jetty
+
+

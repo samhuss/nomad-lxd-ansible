@@ -2,32 +2,117 @@
 - import_role:
     name: nomad_service
 
-- name: update apt cache
-  apt:
-    update_cache: yes
+# - name: update apt cache
+#   apt:
+#     update_cache: yes
 
-- name: install docker and openjdk
+- name: install docker,unzip,dnsutils
   apt:
     name: "{{ packages }}"
     state: present
   vars:
     packages:
       - docker.io
-      - openjdk-11-jdk-headless
+    #   - openjdk-11-jdk-headless
       - unzip
+      - dnsutils
+      - lsof
+  tags:
+    - install
+    - docker
 
+- import_role:
+    name: storage
+
+
+- name: add docker registry certificate
+  copy:
+    src: docker.service.consul.crt
+    dest: /usr/local/share/ca-certificates
+  tags:
+    - docker_registry
+  
+- name: update ca-certificates
+  command: update-ca-certificates
+  tags:
+    - docker_registry
+
+- name: restart docker service
+  service: {name: docker, state: restarted}
+  tags:
+    - docker_registry
+
+  
+
+# - name: install java 8 
+#   unarchive:
+#     src: "{{bootstrap_url}}/{{java8_zip}}"
+#     dest: /opt
+#     mode: "a+rwx"
+#     remote_src: yes
+#   tags:
+#     - install_java
+
+# - name: install java 12 
+#   unarchive:
+#     src: "{{bootstrap_url}}/{{java12_zip}}"
+#     dest: /opt
+#     mode: "a+rwx"
+#     remote_src: yes
+#   tags:
+#     - install_java
+
+# - name:  create java link directories
+#   file: {src: "{{item.src}}" , path: "{{item.path}}", state: link}
+#   loop:
+#     - src: "{{java8_dest}}"
+#       path: "/opt/java8"
+#     - src: "{{java12_dest}}"
+#       path: "/opt/java12"
+#   tags:
+#     - install_java
+    
+
+# - name: set java runtime
+#   file: {src: "{{java12_dest}}/bin/java" , path: "/usr/local/bin/java", state: link}
+#   tags:
+#     - install
+
+- name: set environment variables
+  template:
+      src: bash.bashrc.j2
+      dest: /etc/bash.bashrc
+  tags:
+    - config
+
+  
+- import_role:
+    name: runtime_env
+  
+# - name: set JAVA_HOME
+#   # become: true
+#   lineinfile: dest=/etc/environment regexp='^JAVA_HOME' line="JAVA_HOME=\"{{java_dest}}\"" state=present
+    
 - name: start docker service
   service:
     name: docker
     state: started
+  tags:
+    - docker
 
 - name: copy nomad config
   template:
     src: nomad.hcl.j2
     dest: /etc/nomad.d/nomad.hcl
+  tags:
+    - nomad_client
+    - config
 
 - name: start nomad
   service:
     name: nomad
     state: restarted
     enabled: yes
+  tags:
+    - nomad_client
+    - config

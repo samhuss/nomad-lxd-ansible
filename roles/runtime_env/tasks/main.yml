@@ -1,0 +1,74 @@
+---
+# - name: set environment variables
+#   template:
+#       src: bash.bashrc.j2
+#       dest: /etc/bash.bashrc
+#   tags:
+#     - config
+#     - prod
+#     - dev
+
+- name: disable memory swap
+  command: "swapoff -a"
+  tags:
+    - config
+    - env_prod
+    - env_all
+
+- name: increase memory map count to 262144
+  command: "sysctl -w vm.max_map_count=262144 "
+  tags:
+    - config
+    - env_prod
+    - env_all
+
+- name: create nomad group
+  group:
+    name: nomad # required. Name of the group to manage.
+    state: present
+  tags:
+    - config
+    - env_prod
+    - env_dev
+    - env_all
+
+
+- name: create nomad user
+  user:
+      name: nomad 
+      comment: elasticsearch user
+      create_home: yes # not required. Unless set to C(no), a home directory will be made for the user when the account is created or if the home directory does not exist.,Changed from C(createhome) to C(create_home) in version 2.5.
+      groups: nomad # not required. List of groups user will be added to. When set to an empty string C(''), C(null), or C(~), the user is removed from all groups except the primary group. (C(~) means C(null) in YAML),Before version 2.3, the only input format allowed was a comma separated string. Now this parameter accepts a list as well as a comma separated string.
+      state: present # not required. choices: absent;present. Whether the account should exist or not, taking action if the state is different from what is stated.
+  tags:
+    - config
+    - env_all
+    - env_prod
+    - env_dev
+
+- name: allow nomad user to allocate memory
+  # lineinfile: dest=/etc/security/limits.conf regexp='nomad.*memlock unlimited$' line="nomad {{item}} memlock unlimited" state=present
+  lineinfile: dest=/etc/security/limits.conf regexp='{{item}}' line="{{item}}" state=present
+  with_items: 
+    - "nomad soft memlock unlimited"
+    - "nomad hard memlock unlimited"
+  tags:
+    - config
+    - env_all
+    - env_prod
+    - env_dev
+
+- name: create shared directories 
+  file:
+    path: "{{item}}"
+    state: directory 
+    mode: 777
+  loop:
+    - "/opt/share"
+    - "/opt/share/certs"
+    - "/data"
+  tags:
+    - config
+    - env_all
+    - env_prod
+    - env_dev

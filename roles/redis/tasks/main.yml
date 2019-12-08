@@ -1,0 +1,9 @@
+---
+- name: download redis
+  unarchive:
+    src: http://download.redis.io/releases/redis-5.0.5.tar.gz
+    dest: "{{cache_dir}}"
+    creates: "{{cache_dir}}/{{redis_file}}"
+    remote_src: yes
+
+

@@ -1,14 +1,14 @@
 ---
 - name: install traefik
-  copy:
-    src: cache/traefik
-    dest: /usr/local/bin/
+  get_url:
+    url: "{{bootstrap_url}}/traefik"
+    dest: /usr/local/bin/traefik
     mode: 0755
 
 - name: create traefik service
   copy:
     src: traefik.service
-    dest: /etc/systemd/system/
+    dest: /etc/systemd/system/traefik.service
 
 - name: create traefik config directory
   file:
@@ -17,11 +17,42 @@
 
 - name: copy traefik config
   template:
-    src: traefik.toml.j2
+    src: templates/traefik.toml.j2
     dest: /etc/traefik/traefik.toml
 
-- name: start traefik
+# - name: start traefik
+#   service:
+#     name: traefik
+#     state: restarted
+#     enabled: yes
+
+- name: stop traefik
   service:
     name: traefik
+    state: stopped
+    enabled: no
+# Fabio proxy server
+
+
+- name: install fabio binary
+  get_url: {url : "{{bootstrap_url}}/fabio" , dest: "/usr/local/bin/fabio", mode: 0755}
+
+
+- name: create fabio config directory
+  file: { path: /opt/fabio , state: directory }
+
+- name: copy fabio properties
+  template: {src : fabio.properties.j2 , dest: /opt/fabio/fabio.properties}
+
+- name: create fabio service
+  copy:
+    src: fabio.service
+    dest: /etc/systemd/system/
+
+- name: start fabio
+  service:
+    name: fabio
     state: restarted
     enabled: yes
+
+

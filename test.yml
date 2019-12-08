@@ -1,0 +1,2 @@
+- hosts: nomad_clients
+  debug: var=ansible_facts

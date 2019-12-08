@@ -1,0 +1,16 @@
+
+#/opt/share is shared directory from host to nomad client machine
+# this folder will be mounted from lxc container to host machine
+- name: create shared & persistent directorys
+  file: {path: "{{ item }}" , state: directory, mode: "777" }
+  # file:
+  #   path: "{{ item }}"
+  #   state: directory
+  #   mode: 755
+  loop:
+    - "/opt/share"
+    - "/data"
+    - "/testtttttt"
+  tags:
+    - config
+    - create_directories

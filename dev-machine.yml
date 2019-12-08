@@ -1,0 +1,48 @@
+---
+- hosts: consul1
+  tasks:
+    - name: consul1 info
+      setup: 
+
+- name: setup master as local dev machine
+  hosts: master
+  connection: local
+  become: true
+  # vars:
+  #   - network_interface: lxdbr0
+
+
+  # become: true
+
+  tasks:
+
+    # - name: start http cache server
+    #   shell: cd {{cache_dir}}; nohub python3 http.server {{bootstrap_ip}}:8080 > /dev/null 2>&1 &
+
+
+    - name: create destination folders
+      file: { path: "{{item}}", state: "directory", mode: 777 }
+      loop:
+        - /etc/nomad.d 
+        - /etc/consul.d 
+        - /var/nomad
+        - /var/consul
+
+    - name: setup nomad users and groups
+      import_role: 
+        name: runtime_env
+      tags:
+        - config
+        - env_dev
+
+
+    - include_role:
+        name: consul_service
+    - include_role: 
+        name: nomad_service
+    - include_role: 
+        name: dev_machine
+    - include_role: 
+        name: runtime_env
+
+    

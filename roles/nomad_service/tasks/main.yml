@@ -1,14 +1,15 @@
 ---
 - name: install nomad
-  copy:
-    src: cache/nomad
-    dest: /usr/local/bin/
+  get_url:
+    url: "{{bootstrap_url}}/nomad"
+    dest: /usr/local/bin/nomad
     mode: 0755
+    checksum: "sha1:46dbdf3d43cf1fa2fc7d27f4817d455d30dc42e6"
 
 - name: create nomad service
   copy:
     src: nomad.service
-    dest: /etc/systemd/system/
+    dest: /etc/systemd/system/nomad.service
 
 - name: create nomad directories
   file:
@@ -17,3 +18,16 @@
   loop:
     - /etc/nomad.d
     - /var/nomad
+
+- name: create cni bin
+  file:
+    path: "{{cni_dest}}"
+    state: directory
+    mode: 755
+  
+- name: copy cni plugin
+  unarchive:
+      src: "{{bootstrap_url}}/{{cni_file}}"
+      dest: "{{cni_dest}}"
+      remote_src: yes 
+      mode: "a+rwx" 

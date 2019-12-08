@@ -1,0 +1,20 @@
+server:
+  chroot: ""
+  use-syslog: no
+  do-daemonize: no
+  directory: "/etc/unbound"
+  logfile: "/var/log/unbound.log" 
+  verbosity: 1
+#  username: "unbound"
+#  trust-anchor-file: trusted-key.key
+#  interface-automatic: yes
+
+
+forward-zone:
+  name: "."
+  forward-addr: {{lxc_bridge_ip}}
+#  forward-first: yes
+  forward-addr: 8.8.8.8
+#  forward-addr: 8.8.4.4
+
+  include: "/etc/unbound/unbound.conf.d/*.conf"

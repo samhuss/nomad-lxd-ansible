@@ -1,0 +1,21 @@
+{
+ "bind_addr": "{{ hostvars[inventory_hostname]['ansible_'+network_interface]['ipv4']['address'] }}",
+ "datacenter": "dev",
+ "data_dir": "/var/consul",
+// "encrypt": "EXz7LFN8hpQ4id8EDYiFoQ==",
+ "log_level": "INFO",
+ "enable_syslog": true,
+ "enable_debug": true,
+ "node_name": "{{ansible_hostname}}",
+ "server": false,
+ "rejoin_after_leave": true,
+ "retry_join": [
+    //"{{  hostvars['consul1'].ansible_eth0.ipv4.address}}" 
+    "consul1.node.consul" 
+    ]
+ }
+
+
+{#
+// from .hcl template in dev_machine
+ retry_join = [ "{{ hostvars['consul1'].ansible_eth0.ipv4.address}}" ] #}

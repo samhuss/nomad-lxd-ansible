@@ -1,0 +1,23 @@
+# These two lines are example of running fabio with HTTPS certificates
+#proxy.cs = cs=lb;type=file;cert=/opt/fabio/certs.d/mydomain_com.ca-bundle.crt;key=/opt/fabio/certs.d/mydomain_com.key
+#proxy.addr = :443;cs=lb;tlsmin=tls11;tlsmax=tls12;tlsciphers="0xc02f,0x9f,0xc030,0xc028,0xc014,0x6b,0x39,0x009d,0x0035",\
+#             :80
+proxy.addr = :{{port.fabio.inbound}},:{{port.nats}};proto=tcp
+proxy.header.tls = Strict-Transport-Security
+proxy.header.tls.value = "max-age=63072000; includeSubDomains"
+#registry.consul.register.addr = 127.0.0.1:{{port.fabio.ui}}
+registry.consul.register.addr = {{ ansible_eth0.ipv4.address }}:{{port.fabio.ui}}
+#ui.addr = 127.0.0.1:9998 
+ui.addr = {{ ansible_eth0.ipv4.address }}:{{port.fabio.ui}}
+ui.access = ro
+runtime.gogc = 800
+log.access.target = stdout
+log.access.format = $remote_host - - [$time_common] "$request" $response_status $response_body_size "$header.Referer" "$header.User-Agent" "$request_scheme" "$request_proto" "$upstream_addr" "$upstream_service"
+log.access.level = INFO
+#registry.consul.addr = 127.0.0.1:8500 # consul agent on the same machine
+#registry.consul.addr = consul1.node.consul:8500
+# TODO: Add fabio specific acls in consul
+# This is the consul token (UUID) we generated for Consul
+# It can be found in /opt/consul/conf.d/main.json under 'acl_master_token'
+#registry.consul.token = $TOKEN
+proxy.maxconn = 20000

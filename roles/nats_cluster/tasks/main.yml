@@ -1,0 +1,14 @@
+---
+- name: install nats,streaming
+  get_url: url="{{bootstrap_url}}/{{item}}" dest="/usr/local/bin/{{item}}" mode=755
+  loop:
+    - nats-server
+    - nats-streaming-server
+
+- name: create config directories
+  file: path="/opt/nats/{{item}}" state=directory mode="655"
+  loop:
+    - log
+    - config
+
+# - name: create nats streaming config 

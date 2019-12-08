@@ -1,0 +1,19 @@
+---
+- name: install lxc, lxd
+
+- name: create bootstrap cache folder
+  file: path="{{cache_dir}}" state=directory mode=777
+
+- name: run docker nginx bootstrap server
+  become: true
+  shell: docker run --rm -it -p 8080:80 -v {{cache_dir}}:/usr/share/nginx/html:ro nginx:alpine
+
+
+# - name: install nginx
+#   package: pkg=nginx state=installed
+#   notify: start nginx
+
+
+# - handlers: 
+#   - name: start nginx
+#     service: name=nginx state=started

@@ -1,0 +1,5 @@
+---
+- hosts: master
+  tasks:
+    - name: start python3 cache server 
+      shell: cd "/home/{{ansible_user}}/ansible/cache"; nohup python3 -m http.server </dev/null >/dev/null 2>&1 &

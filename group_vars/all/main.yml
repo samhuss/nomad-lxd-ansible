@@ -1,7 +1,104 @@
 ---
-jetty_file: jetty-distribution-9.4.19.v20190610.zip
-jetty_url: "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.19.v20190610/{{jetty_file}}"
-jetty_zip: "jetty.tar.gz"
-jetty_dest: "/opt/jetty"
-kafka_file: kafka_2.12-2.3.0.tgz
-kafka_url: "https://www-eu.apache.org/dist/kafka/2.3.0/{{kafka_file}}"
+# defaults
+#network_interface: eth0
+
+# home directories for bin files, root directories for data and config files to be persistent with every version change
+#cache_dir: "/usr/local/share/ansible/cache"
+cache_dir: "/opt/ansible/cache"
+lxc_bridge_ip: "10.35.33.1"
+bootstrap_ip: "{{lxc_bridge_ip}}:8080"
+#bootstrap_url: "http://master:8080"
+bootstrap_url: "http://{{lxc_bridge_ip}}:8080"
+jetty_version: jetty-distribution-9.4.19.v20190610
+jetty_file: "{{jetty_version}}.zip"
+jetty_download_url: "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.19.v20190610/{{jetty_file}}"
+#jetty_url: "http://{{bootstrap_ip}}/{{jetty_file}}"
+jetty_home_dir: "/opt/{{jetty_version}}"
+jetty_root_dir: /usr/local/jetty/www
+
+kafka_version: kafka_2.12-2.3.0
+kafka_file: "{{kafka_version}}.tgz"
+kafka_home_dir: "/opt/{{kafka_version}}"
+kafka_root_dir: /usr/local/kafka
+
+kafka_download_url: "https://www-eu.apache.org/dist/kafka/2.3.0/{{kafka_file}}"
+#kafka_url: "http://{{bootstrap_ip}}/{{kafka_file}}"
+
+zookeeper_version: apache-zookeeper-3.5.5-bin
+zookeeper_file: "{{zookeeper_version}}.tar.gz"
+zookeeper_download_url: "https://www-eu.apache.org/dist/zookeeper/zookeeper-3.5.5/{{zookeeper_file}}"
+#zookeeper_url: "http://{{bootstrap_ip}}/{{zookeeper_file}}"
+
+
+zookeeper_home_dir: "/opt/{{zookeeper_version}}"
+#persistent directory for zookeeper data and configs
+zookeeper_root_dir: /data/zookeeper
+zookeeper_data_dir: "{{zookeeper_root_dir}}/data"
+zookeeper_conf_dir: "{{zookeeper_root_dir}}/conf"
+# Note: log files to be removed to ephemeral storage later
+zookeeper_datalog_dir: "{{zookeeper_root_dir}}/log"
+
+
+java8_zip: jdk-8u221-linux-x64.tar.gz
+java8_version: 1.8.0_221
+java8_dir: "jdk{{java8_version}}"
+java8_dest: "/opt/{{java8_dir}}"
+
+java12_zip: openjdk-12.0.2_linux-x64_bin.tar.gz
+java12_version: 12.0.2
+java12_dir: "jdk-{{java12_version}}"
+java12_dest: "/opt/{{java12_dir}}"
+
+# example using a static network peer configuration
+#zookeeper_client_port_address: '127.0.0.1'
+#zookeeper_network:
+#  type: static
+#  peer_type: member
+#  peers:
+#    - id: 1
+#      peer: '127.0.0.1'
+#      type: member
+
+# example of using Ansible groups and groupvars
+zookeeper_network:
+  type: group
+  group_name: zookeepers
+  quorum_group_name: zookeeper-quorum
+  use_ips: False
+  iface: eth0
+
+zookeeper_init_system: systemd
+zookeeper_dir: /usr/local/zookeeper
+zookeeper_launch: True
+
+# to inject log4j configs into the zk config
+#zookeeper_log4j_conf:
+#  - rootLogger.level = info
+zookeeper_tick_time: 4000
+zookeeper_init_limit: 5 #10
+zookeeper_sync_limit: 2 #5
+zookeeper_client_port : 2181
+zookeeper_peer_port: 2888
+zookeeper_election_port: 3888
+zookeeper_conf_subdir: conf
+zookeeper_data_subdir: data
+zookeeper_datalog_subdir: log
+zookeeper_max_client_cnxns: 60
+zookeeper_autopurge_snapretaincount: 3
+zookeeper_autopurge_purgeinterval: 1
+zookeeper_client_port_address: 127.0.0.1
+
+redis_file: redis-5.0.5
+
+# cni plugin for Nomad connect to create "bridge" network
+cni_file: "cni-plugins-linux-amd64-v0.8.1.tgz"
+cni_plugin_url: "https://github.com/containernetworking/plugins/releases/download/v0.8.1/{{cni_file}}"
+cni_dest: "/opt/cni/bin"
+
+
+### system ports
+port:
+  nats: 4222
+  fabio: 
+    inbound: 80
+    ui: 9998

@@ -1,0 +1,79 @@
+---
+- hosts: master #localhost in inventory/hosts file
+  # run this task in the host
+  #connection: local
+  # set urls as variables
+  vars:
+    consul_version: "1.6.0"
+    consul_file: "consul_{{consul_version}}_linux_amd64.zip" 
+    nomad_version: "0.10.0-beta1"
+    nomad_file: "nomad_{{nomad_version}}_linux_amd64.zip"
+    traefik_version: "1.7.13"
+    consul_url: "https://releases.hashicorp.com/consul/{{ consul_version }}/{{ consul_file }}"
+    consul_url_sha: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_SHA256SUMS"
+    nomad_url: "https://releases.hashicorp.com/nomad/{{ nomad_version }}/{{ nomad_file }}"
+    nomad_url_sha: "https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_SHA256SUMS"
+    traefik_url: "https://github.com/containous/traefik/releases/download/v{{ traefik_version }}/traefik_linux-amd64"
+    jety_url: https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.19.v20190610/jetty-distribution-9.4.19.v20190610.zip
+
+  tasks:
+    - name: create cache directory
+      become: true
+      file: { path: "{{cache_dir}}/src", state: directory, mode: 0666 }
+    
+    - name: download required apps 
+      become: true
+      get_url:
+          dest: "{{cache_dir}}/src/{{item.file}}"
+          url: "{{item.url}}" # required. HTTP, HTTPS, or FTP URL in the form (http|https|ftp)://[user[:pass]]@host.domain[:port]/path
+          # sha256sum: "{{item.sha}}"
+          mode: 777
+          owner: "sam"
+          group: "sam"
+          # tmp_dest: "{{cache_dir}}/src"
+          force: no
+      loop:     
+        - url: "{{ consul_url }}"
+          # sha: "{{consul_url_sha}}"
+          file: "{{consul_file}}"
+        - url: "{{ nomad_url }}"
+          # sha: "{{ nomad_url_sha }}"
+          file: "{{nomad_file}}"
+      notify:
+        - unpack_applications
+
+#        - url: "{{ jetty_url}}"
+#          file: jetty
+
+    - name: download cni plugin
+      get_url:
+        dest: "{{cache_dir}}"
+        url: "{{cni_plugin_url}}"
+
+    - name: trigger unpack
+      command: /bin/true
+      notify: unpack_applications
+
+    # - name: fecth traefik
+    #   get_url:
+    #     url: "{{ traefik_url }}"
+    #     dest: "{{cache_dir}}/traefik"
+    #     mode: 0755
+  handlers:
+    - name: unpack_applications
+      become: yes
+      unarchive:
+        src: "{{ cache_dir}}/src/{{item.file}}"
+        dest: "{{cache_dir}}"
+        #creates: "{{cache_dir}}/{{ item.dest_file }}"
+        # creates: "{{cache_dir}}"
+        owner: "{{ansible_user}}"
+        group: "{{ansible_user}}"
+        mode: "a+rwx"
+        remote_src: yes
+        # force: yes
+      loop:
+        - file: "{{consul_file}}"
+          dest_file: consul
+        - file: "{{nomad_file}}"
+          dest_file: nomad

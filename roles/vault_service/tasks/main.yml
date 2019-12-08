@@ -1,0 +1,20 @@
+---
+- name: install vault
+  get_url:
+    url: "{{bootstrap_url}}/vault"
+    dest: /usr/local/bin/vault
+    mode: 0755
+    checksum: "sha1:d0267b5a8277507af3f6b21c535175de94965fba"
+
+- name: create vault service
+  copy:
+    src: vault.service
+    dest: /etc/systemd/system/vault.service
+
+- name: create vault directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/vault.d
+    - /var/vault
